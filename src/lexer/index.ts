@@ -4,8 +4,7 @@ const tokenize = (input: string) => {
   while (currentIndex < input.length) {
     const currentChar = input[currentIndex];
     // 判断空格
-    const spaceReg = /\s/;
-    if (spaceReg.test(currentChar)) {
+    if (isWhiteSpace(currentChar)) {
       currentIndex++;
       continue;
     }
@@ -17,4 +16,31 @@ const tokenize = (input: string) => {
 
     // 判断string
   }
+}
+
+/**
+ * 是否为空格
+ * @param char 
+ * @returns 
+ */
+function isWhiteSpace(char){
+  return /\s/.test(char);
+}
+
+/**
+ * 是否是字母
+ * @param char 
+ * @returns 
+ */
+function isLetter(char){
+  return /[a-zA-Z]/.test(char);
+}
+
+/**
+ * 是否是数字
+ * @param char 
+ * @returns 
+ */
+function isDigit(char){
+  return /[0-9]/.test(char);
 }
