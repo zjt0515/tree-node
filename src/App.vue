@@ -1,9 +1,5 @@
 <template>
-  <tree-node />
-  <n-message-provider>
-    <bracket-parser />
-  </n-message-provider>
-  <RegexTest/>
+  <GlobalLayout/>
 </template>
 
 <script setup>
@@ -11,6 +7,7 @@ import {NMessageProvider} from 'naive-ui'
 import TreeNode from "./components/TreeNode.vue";
 import BracketParser from "./components/BracketParser.vue";
 import RegexTest from "./components/RegexTest.vue";
+import GlobalLayout from './layouts/GlobalLayout.vue';
 </script>
 
 <style scoped></style>
