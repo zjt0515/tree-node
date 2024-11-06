@@ -1,4 +1,4 @@
-export default class Stack {
+class Stack {
     constructor() {
         this.items = [];
     }
@@ -27,9 +27,8 @@ export default class Stack {
 // export {Stack}
 
 function isBracket(char){
-    return /[\(\)\[\]\{\}]/.test(char);
+    return /[\(\)\[\]\{\}\<\>]/.test(char);
 }
-/^((ht|f)tps?:\/\/)?[\w-]+(\.[\w-]+)+:\d{1,5}\/?$/
 
 function isWhiteSpace(char){
     return /\s/.test(char);
@@ -69,8 +68,8 @@ const keywords = ["int", "float", "long", "double", "char", "auto", "void", "sig
     "return", "if", "else", "while", "for", "switch", "case","break","default", "goto"
 ]
 // 分隔符定义
-const punctuators = [",", ";", ":"];
+const punctuators = [",", ";", ":", "."];
 // 运算符定义
 const operators = ["+", "-", "*", "/", "%", "=", "==", ">", "<", "!", "&&", "||"];
 
-export {Token, isDigit, isLetter, isWhiteSpace, isBracket, keywords, punctuators, operators, TokenType}
+export {Token, isDigit, isLetter, isWhiteSpace, isBracket, keywords, punctuators, operators, TokenType, Stack}

@@ -5,55 +5,63 @@
       v-model:value="code"
       type="textarea"
     />
-      <n-button @click="check(value)">检查括号</n-button>
-      <n-button @click="token(value)">词法分析</n-button>
-
-    {{ value }}
-
+    <div class="buttons">
+      <n-button type="primary" @click="check(brackets)">检查括号</n-button>
+      <n-button type="primary" @click="token(code)">词法分析</n-button>
+    </div>
     <n-data-table
     :columns="columns"
-    :data="data"
-    :pagination="pagination"
+    :data="tokens"
     :bordered="false"
-    :row-key="tokens"
+    :row-class-name="rowClassName"
   />
+  {{ tokens }}
+  {{ brackets }}
   </div>
 </template>
 
 <script setup>
-import Stack from "@/js/index.js";
 import { NInput, NButton, useMessage, NDataTable } from "naive-ui";
 import { computed, ref } from "vue";
-import { tokenize } from '@/js/lexer.js'
+import { tokenize, isValidBrackets, getBracketsFromTokens } from '@/js/lexer.js'
 const message = useMessage();
 const code = ref("");
-const brackets =()=>{}
+const tokens = ref([])
+const brackets = computed(()=>{
+  return getBracketsFromTokens(tokens.value)
+})
+const columns = [
+  {
+    title: "TokenType",
+    key: "type",
+    className: "type",
+  }, 
+  {
+    title: "Value",
+    key: "value"
+  }
+]
+const rowClassName = (row)=>{
+  if (row.type === 'identifier') {
+    return 'too-old'
+  }
+  return ''
+}
+
 const check = (s) => {
-  if (isValid(s)) message.success("括号匹配正确");
+  if (isValidBrackets(s)) message.success("括号匹配正确");
   else message.error("匹配失败");
 };
-const tokens = ref([])
-const data =computed(()=>{
-  return tokens.value.map((item,index) => {return {...item, key: `${index}`}})
-})
+
 const token = () => {
   tokens.value = tokenize(code.value);
 }
 
-const isValid = (s) => {
-  const stack = new Stack();
-  const map = {
-    "(": ")",
-    "{": "}",
-    "[": "]",
-  };
-  for (const x of s) {
-    if (x in map) {
-      stack.push(x);
-      continue;
-    }
-    if (map[stack.pop()] !== x) return false;
-  }
-  return !stack.size();
-};
+
 </script>
+
+<style scoped>
+.buttons{
+  margin-top: 1.2em;
+}
+</style>

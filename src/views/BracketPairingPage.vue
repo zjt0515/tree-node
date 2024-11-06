@@ -5,7 +5,7 @@
   </n-message-provider>
 </div>
 </template>
-<script setup lang="ts">
+<script setup>
 import { NMessageProvider } from 'naive-ui';
 import BracketParser from '@/components/BracketParser.vue';
 </script>

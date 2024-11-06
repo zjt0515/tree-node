@@ -20,9 +20,22 @@ const menuOptions: MenuOption[] = [
             path: '/'
           }
         },
-        { default: () => '回家' }
+        { default: () => '主页' }
       ),
     key: 'go-back-home',
+  },
+  {
+    label: () =>
+      h(
+        RouterLink,
+        {
+          to: {
+            path: '/treenode'
+          }
+        },
+        { default: () => '求二叉树结点祖先' }
+      ),
+    key: 'treenode',
   },
   {
     label: () =>
@@ -33,7 +46,7 @@ const menuOptions: MenuOption[] = [
             path: '/bracket-pairing'
           }
         },
-        { default: () => '括号配对' }
+        { default: () => '括号配对器' }
       ),
     key: 'bracketPairing',
   }

@@ -8,6 +8,7 @@ import {
   punctuators,
   Token,
   TokenType,
+  Stack
 } from "./index.js";
 
 const tokenize = (input) => {
@@ -46,11 +47,16 @@ const tokenize = (input) => {
       currentIndex++;
       continue;
     }
-    // 判断标识符或者关键字
+    // 判断标识符(或者关键字)
     if (isLetter(currentChar) || currentChar === "_") {
       let start = currentIndex;
       do{
-        currentChar = input[++currentIndex];
+        ++currentIndex;
+        if(currentIndex >= input.length){
+          break;
+        } else{
+          currentChar = input[currentIndex];
+        }
       }while(isLetter(currentChar) || currentChar === "_" || isDigit(currentChar))
       
       let value = input.slice(start, currentIndex);
@@ -71,9 +77,9 @@ const tokenize = (input) => {
     }
     // 判断"string"
     if(currentChar === '"'){
-      let start = currentChar++;
+      let start = currentIndex++;
       while(currentChar !== '"'){
-        currentChar = input[++currentChar]
+        currentChar = input[++currentIndex]
       }
       let value = input.slice(start, currentIndex);
       tokens.push(new Token(TokenType.STRING, value));
@@ -84,14 +90,45 @@ const tokenize = (input) => {
   }
   return tokens;
 };
-const input = `
+const input1 = `
   // this is comment({})
   int main(){
     if(r){
-      int result;
+      int result "string2";
     }
     return 0;
   }
 `
-console.log(tokenize(input))
-export { tokenize }
+const input2 = `23414`
+console.log(tokenize(input2))
+/**
+ * 从tokens中提取括号
+ * @param {*} tokens 
+ * @returns 包含括号的字符串
+ */
+const getBracketsFromTokens = (tokens)=>{
+  return tokens.filter(token => token.type === TokenType.BRACKET).map(token => token.value)
+}
+/**
+ * 判断括号是否匹配
+ * @param {*} s 
+ * @returns 
+ */
+const isValidBrackets = (s) => {
+  const stack = new Stack();
+  const map = {
+    "(": ")",
+    "{": "}",
+    "[": "]",
+  };
+  for (const x of s) {
+    if (x in map) {
+      stack.push(x);
+      continue;
+    }
+    if (map[stack.pop()] !== x) return false;
+  }
+  return !stack.size();
+};
+
+export { tokenize, getBracketsFromTokens, isValidBrackets }
