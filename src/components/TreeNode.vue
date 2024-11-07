@@ -4,18 +4,38 @@
   {{"root:"+ root }} -->
   <n-button type="primary" @click="draw">可视化二叉树</n-button>
   <n-input v-model:value="data" type="text" placeholder="请输入二叉树（数组表示）" />
+  <n-space align="center" class="search">
+    查询值为<n-input-number v-model:value="x" placeholder="" clearable />的所有祖先结点
+  <n-button type="primary" @click="searchAncestors">查询</n-button>
+  <n-card title="查询结果">
+    {{ ancestors }}  
+  </n-card>
+  </n-space>
+  
   <canvas id="cvs"></canvas>
 </template>
 
 <script setup>
-import { NInput, NButton } from 'naive-ui';
+import { NInput, NButton, NInputNumber,NSpace, NCard, useMessage} from 'naive-ui';
 import { computed, onMounted, ref, watchEffect } from 'vue';
-import { arrayToTree } from '@/js/treenode.js'
+import { arrayToTree,findAncestors  } from '@/js/treenode.js'
+const message = useMessage()
 /** @type {HTMLCanvasElement} */
 let cvs
 let ctx
-const data = ref([])
+const data = ref("[3,5,9,4,6,2,4,6,8,2]")
 const root = ref()
+const ancestors = ref([])
+const x = ref()
+const searchAncestors = () => {
+  ancestors.value = []
+  if(findAncestors(root.value, x.value, ancestors.value)){
+    message.success('查询成功')
+    draw()
+  } else {
+    message.error(`未找到在值为${x.value}的结点`)
+  }
+}
 const isValid = (data) => {
   try {
     // 尝试解析输入的字符串为数组
@@ -25,14 +45,13 @@ const isValid = (data) => {
       Array.isArray(parsedArray) &&
       parsedArray.every((item) => typeof item === "number" || !item)
     ) {
-      console.log("输入格式正确!")
       return true;
     } else {
-      console.log("请输入一个包含数字的有效数组！")
+      message.error("请输入一个包含数字的有效数组！")
       return false;
     }
   } catch (e) {
-    console.log("输入格式错误！请使用有效的 JSON 数组格式。")
+    message.error("输入格式错误！请使用有效的数组格式。")
     return false;
   }
 }
@@ -104,5 +123,13 @@ function drawNode(ctx, node, x, y, offsetX, offsetY) {
     drawNode(ctx, node.right, x + offsetX, y + offsetY, offsetX / 2, offsetY);
   }
 }
-
 </script>
+
+<style scoped>
+.search{
+  margin-top: 1.2em;
+}
+.n-card {
+  max-width: 600px;
+}
+</style>

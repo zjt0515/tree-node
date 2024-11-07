@@ -7,7 +7,6 @@
       </n-layout-content>
       <n-layout-footer class="footer">footer</n-layout-footer>
     </n-layout>
-    <n-layout></n-layout>
   </div>
 </template>
 

@@ -70,6 +70,6 @@ const keywords = ["int", "float", "long", "double", "char", "auto", "void", "sig
 // 分隔符定义
 const punctuators = [",", ";", ":", "."];
 // 运算符定义
-const operators = ["+", "-", "*", "/", "%", "=", "==", ">", "<", "!", "&&", "||"];
+const operators = ["+", "-", "*", "/", "%", "=", "=", ">", "<", "!", "&", "|"];
 
 export {Token, isDigit, isLetter, isWhiteSpace, isBracket, keywords, punctuators, operators, TokenType, Stack}
