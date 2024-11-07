@@ -2,41 +2,54 @@
   <h2>二叉树</h2>
   <!-- {{"data:"+ data }}
   {{"root:"+ root }} -->
-  <n-button type="primary" @click="draw">可视化二叉树</n-button>
-  <n-input v-model:value="data" type="text" placeholder="请输入二叉树（数组表示）" />
-  <n-space align="center" class="search">
-    查询值为<n-input-number v-model:value="x" placeholder="" clearable />的所有祖先结点
-  <n-button type="primary" @click="searchAncestors">查询</n-button>
+
+  <n-grid :x-gap="16" :y-gap="12" :cols="2">
+    <n-grid-item>
+      <n-input v-model:value="data" type="text" placeholder="输入二叉树数组形式(空节点输入null)">
+      </n-input>
+    </n-grid-item>
+    <n-grid-item>
+      <n-button type="primary" ghost @click="draw">可视化二叉树</n-button>
+    </n-grid-item>
+    <n-grid-item>
+      <n-input-number v-model:value="x" placeholder="请输入">
+        <template #prefix>
+          查询值为
+        </template>
+      </n-input-number>
+    </n-grid-item>
+    <n-grid-item>
+      <n-button type="primary" ghost @click="searchAncestors">查询所有祖先节点</n-button>
+    </n-grid-item>
+  </n-grid>
   <n-card embedded title="查询结果">
     祖先：{{ ancestors }}
 
   </n-card>
-  </n-space>
-  
   <canvas id="cvs"></canvas>
 
   <n-card title="测试数据">
-    {{ ancestors }}  
-    nodeData: {{ nodeData  }}
+    {{ ancestors }}
+    nodeData: {{ nodeData }}
   </n-card>
 </template>
 
 <script setup>
-import { NInput, NButton, NInputNumber,NSpace, NCard, useMessage} from 'naive-ui';
+import { NInput, NButton, NInputNumber, NSpace, NCard, useMessage, NInputGroup, NGrid, NGridItem } from 'naive-ui';
 import { computed, onMounted, reactive, ref, watchEffect } from 'vue';
-import { arrayToTree, findAncestors} from '@/js/treenode.js'
+import { arrayToTree, findAncestors } from '@/js/treenode.js'
 const message = useMessage()
 /** @type {HTMLCanvasElement} */
 let cvs
 let ctx
 const data = ref("[3,5,9,4,6,2,4,6,8,2]")
-const nodeData = reactive({root: null})
+const nodeData = reactive({ root: null })
 const ancestors = ref([])
 const x = ref()
 const searchAncestors = () => {
   draw()
   ancestors.value = []
-  if(findAncestors(nodeData.root, x.value, ancestors.value)){
+  if (findAncestors(nodeData.root, x.value, ancestors.value)) {
     message.success('查询成功')
     draw()
   } else {
@@ -63,16 +76,16 @@ const isValid = (data) => {
     return false;
   }
 }
-onMounted(()=>{
+onMounted(() => {
   cvs = document.getElementById('cvs')
-  if(cvs.getContext){
+  if (cvs.getContext) {
     ctx = cvs.getContext('2d')
   }
   init()
   // drawNode(ctx, root.value, 400, 50, 150, 50)
 })
 
-function init(){
+function init() {
   ctx.clearRect(0, 0, 1000, 600); // 清除画布
 
   // 设置绘制样式
@@ -80,7 +93,7 @@ function init(){
   ctx.fillStyle = "#000";
   ctx.lineWidth = 2;
   const w = 1000, h = 600
-  cvs.width = w * devicePixelRatio  
+  cvs.width = w * devicePixelRatio
   cvs.height = h * devicePixelRatio
   cvs.style.width = w + 'px';
   cvs.style.height = h + 'px';
@@ -88,8 +101,8 @@ function init(){
 /**
  * 绘制二叉树
  */
-function draw(){
-  if(isValid(data.value)){
+function draw() {
+  if (isValid(data.value)) {
     ctx.clearRect(0, 0, 1000, 600); // 清除画布
     nodeData.root = arrayToTree(JSON.parse(data.value));
     drawNode(ctx, nodeData.root, 400, 50, 150, 50)
@@ -99,19 +112,18 @@ function drawNode(ctx, node, x, y, offsetX, offsetY) {
   if (!node) return;
 
   // 绘制当前节点的圆
-  ctx.fillStyle = "#000"
+  ctx.fillStyle = "#18a058"
   ctx.beginPath();
   ctx.arc(x, y, 20, 0, Math.PI * 2);
   ctx.fill();
   // 绘制value
-  if(node?.highlight){
+  if (node?.highlight) {
     console.log("存在")
     ctx.fillStyle = "#777";
   }
-  ctx.font='1.4em sans-serif';
+  ctx.font = '1.4em sans-serif';
   ctx.fillStyle = "#fff";
   ctx.fillText(node.value, x - 7, y + 5);
-
   // 绘制左右子树
   if (node.left) {
     ctx.beginPath();
@@ -131,11 +143,4 @@ function drawNode(ctx, node, x, y, offsetX, offsetY) {
 }
 </script>
 
-<style scoped>
-.search{
-  margin-top: 1.2em;
-}
-.n-card {
-  max-width: 600px;
-}
-</style>
+<style scoped></style>

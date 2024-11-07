@@ -1,5 +1,6 @@
 <template>
   <div class="bracketParser">
+    //TODO整理页面
     <n-space>
       <h2>请输入C语言代码</h2>
     </n-space>
@@ -19,11 +20,11 @@
         <!-- <template #header> hhh </template> -->
         <n-list-item>
           <template #prefix>
-            <n-button type="primary" @click="check">是否匹配</n-button>
+            <n-button type="primary" @click="checkBrackets">是否匹配</n-button>
             <n-tag type="error"> 成功 </n-tag>
           </template>
           <n-thing title="括号序列" title-extra="extra" description="description">
-            {{ "括号序列：" + brackets }}
+            {{ "括号序列：" + bracketList }}
           </n-thing>
         </n-list-item>
         <n-list-item>
@@ -37,22 +38,25 @@
     </n-card>
     <!-- Tokens表格 -->
     <n-space vertical :size="12">
+      <!-- 查询 -->
       <n-space>
         <n-dropdown trigger="hover" :options="typeOptions" @select="handleSelect">
           <n-button>类型</n-button>
         </n-dropdown>
-        <n-button @click="unfilterAddress">
+        <n-button @click="unfilter">
           清除过滤
         </n-button>
       </n-space>
       <n-space class="tags">
-        <n-tag closable @close="handleClose">
+        <n-tag v-for="tag in tags" closable @close="handleClose(tag)">
+          {{ tag }}
         </n-tag>
       </n-space>
-      <n-data-table :columns="columns" :data="tokens" :bordered="false" :row-class-name="rowClassName"
+      <!-- 表格本体 -->
+      // TODO 新增自定义列，用于匹配算法
+      <n-data-table ref="tableRef" :columns="columns" :data="tokens" :bordered="false" :row-class-name="rowClassName"
         :pagination="paginationReactive" @update:filters="handleUpdateFilter" />
     </n-space>
-    {{ options }}
   </div>
 </template>
 
@@ -71,12 +75,14 @@ import {
   NTag,
   NDropdown
 } from "naive-ui";
-import { computed, reactive, ref, defineComponent } from "vue";
+import { computed, reactive, ref } from "vue";
 import {
   tokenize,
+  isValid2,
   isValidBrackets,
   isValid,
-  getBracketsFromTokens,
+  getBracketTokens,
+  bracketTokensToList
 } from "@/js/lexer.js";
 import { TokenType } from "@/js/index.js"
 const message = useMessage();
@@ -92,9 +98,12 @@ const code = ref(`int main() {
     return a;
 }`);
 const tokens = ref([]);
-const brackets = computed(() => {
-  return getBracketsFromTokens(tokens.value);
+const bracketTokens = computed(() => {
+  return getBracketTokens(tokens.value);
 });
+const bracketList = computed(() => {
+  return bracketTokensToList(bracketTokens.value)
+})
 const removedBrackets = ref([]);
 const matchBrackets = ref([]);
 const bracketIndex1 = ref();
@@ -117,14 +126,14 @@ const getTokens = () => {
 /**
  * 检查括号匹配
  */
-const check = () => {
+const checkBrackets = () => {
   // 先进行一遍词法分析
   if (getTokens()) {
-    if (isValid(brackets.value)) message.success("括号匹配正确");
+    if (isValid(bracketList.value)) message.success("括号匹配正确");
     else message.error("匹配失败");
     removedBrackets.value = [];
     matchBrackets.value = [];
-    isValidBrackets(brackets.value, removedBrackets.value, matchBrackets.value);
+    isValidBrackets(bracketTokens.value, removedBrackets.value, matchBrackets.value);
   }
 };
 
@@ -146,7 +155,6 @@ const columns = [
   {
     title: "TokenType",
     key: "type",
-    className: "type",
   },
   {
     title: "Value",
@@ -157,16 +165,23 @@ const columns = [
     key: "index",
   },
 ];
-const rowClassName = (row) => {
-  if (row.type === "identifier") {
-    return "too-old";
-  }
-  return "";
-};
 const typeOptions = Object.values(TokenType).map(x => ({ label: x, key: x }))
-const
+const tags = ref([])
 const handleSelect = (key) => {
-  message.info(String(key));
+  tags.value.push(key)
+  filterTokenType()
+}
+const handleClose = (tag) => {
+  tags.value.splice(tag, 1)
+}
+const tableRef = ref(null)
+const filterTokenType = () => {
+  tableRef.value.filter({
+    type: tags.value
+  })
+}
+const unfilter = () => {
+  tableRef.value.filter(null)
 }
 </script>
 

@@ -9,7 +9,7 @@ import {
   punctuators,
   Token,
   TokenType,
-  Stack
+  Stack,
 } from "./index.js";
 import { renderList } from "vue";
 
@@ -24,10 +24,10 @@ const tokenize = (input) => {
       continue;
     }
     // 解析单行comment
-    if (currentChar === '/' && input[currentIndex + 1] === '/'){
+    if (currentChar === "/" && input[currentIndex + 1] === "/") {
       let start = currentIndex;
       currentChar = input[++currentIndex];
-      while(!/\n/.test(currentChar)){
+      while (!/\n/.test(currentChar)) {
         currentChar = input[++currentIndex];
       }
       let value = input.slice(start, currentIndex);
@@ -35,24 +35,27 @@ const tokenize = (input) => {
       continue;
     }
     // 解析多行comment
-    if (currentChar === '/' && input[currentIndex + 1] === '*'){
-      let comment = '/*'
+    if (currentChar === "/" && input[currentIndex + 1] === "*") {
+      let comment = "/*";
       currentIndex += 2;
-      while(currentIndex < input.length && !(input[currentIndex] === '*' && input[currentIndex+1] === '/')){
-        comment += input[currentIndex++]
+      while (
+        currentIndex < input.length &&
+        !(input[currentIndex] === "*" && input[currentIndex + 1] === "/")
+      ) {
+        comment += input[currentIndex++];
       }
-      comment += '*/'
+      comment += "*/";
       tokens.push(new Token(TokenType.COMMENT, comment));
       continue;
     }
     //解析标点符号
-    if (punctuators.includes(currentChar)){
+    if (punctuators.includes(currentChar)) {
       tokens.push(new Token(TokenType.PUNCTUATOR, currentChar));
       currentIndex++;
       continue;
     }
     // 解析括号
-    if (isBracket(currentChar)){
+    if (isBracket(currentChar)) {
       tokens.push(new Token(TokenType.BRACKET, currentChar, currentIndex));
       currentIndex++;
       continue;
@@ -60,15 +63,19 @@ const tokenize = (input) => {
     // 解析标识符(或者关键字)
     if (isLetter(currentChar) || currentChar === "_") {
       let start = currentIndex;
-      do{
+      do {
         ++currentIndex;
-        if(currentIndex >= input.length){
+        if (currentIndex >= input.length) {
           break;
-        } else{
+        } else {
           currentChar = input[currentIndex];
         }
-      }while(isLetter(currentChar) || currentChar === "_" || isDigit(currentChar))
-      
+      } while (
+        isLetter(currentChar) ||
+        currentChar === "_" ||
+        isDigit(currentChar)
+      );
+
       let value = input.slice(start, currentIndex);
       if (keywords.includes(value)) {
         tokens.push(new Token(TokenType.KEYWORD, value));
@@ -78,22 +85,22 @@ const tokenize = (input) => {
       continue;
     }
     // 解析运算符
-    if(operators.includes(currentChar)){
+    if (operators.includes(currentChar)) {
       currentIndex++;
       continue;
     }
     // 判断number
-    if(isDigit(currentChar)){
+    if (isDigit(currentChar)) {
       let start = currentIndex++;
-      while(isDigit(input[currentIndex])) currentIndex++;
+      while (isDigit(input[currentIndex])) currentIndex++;
       let value = input.slice(start, currentIndex);
       tokens.push(new Token(TokenType.NUMBER, value));
       continue;
     }
     // 解析"string"
-    if(currentChar === '"'){
+    if (currentChar === '"') {
       let start = currentIndex++;
-      while(currentIndex < input.length && input[currentIndex] !== '"'){
+      while (currentIndex < input.length && input[currentIndex] !== '"') {
         currentIndex++;
       }
       currentIndex += 1;
@@ -102,25 +109,28 @@ const tokenize = (input) => {
       continue;
     }
     // 不支持类型
-    throw new TypeError('unknown character is: ' + currentChar);
+    throw new TypeError("unknown character is: " + currentChar);
   }
   return tokens;
 };
 
 /**
  * 从tokens中提取括号
- * @param {*} tokens 
+ * @param {*} tokens
  * @returns 包含括号的字符串
  */
-const getBracketsFromTokens = (tokens)=>{
-  return tokens.filter(token => token.type === TokenType.BRACKET).map(token => token.value)
-}
+const getBracketTokens = (tokens) => {
+  return tokens.filter((token) => token.type === TokenType.BRACKET);
+};
+const bracketTokensToList = (tokens) => {
+  return tokens.map((item) => item.value);
+};
 /**
  * 判断括号是否匹配
- * @param {*} s 
- * @returns 
+ * @param {*} s
+ * @returns
  */
-const isValidBrackets = (s, removed=[], match=[]) => {
+const isValidBrackets = (s, removed = [], match = []) => {
   const stack = new Stack();
   const map = {
     "(": ")",
@@ -134,35 +144,35 @@ const isValidBrackets = (s, removed=[], match=[]) => {
       continue;
     }
     // 遇到右括号
-    if(!stack.isEmpty()){
+    if (!stack.isEmpty()) {
       // 左括号存在，弹出左括号检查是否匹配
-      const leftIndex = stack.size()
-      const leftBracket = stack.pop()
-      if (map[leftBracket] !== x){
+      const leftIndex = stack.size();
+      const leftBracket = stack.pop();
+      if (map[leftBracket] !== x) {
         // 删去不匹配的括号
-        removed.push({index:leftIndex, value: leftBracket})
-        removed.push({index, value: x})
-      } else{
+        removed.push({ index: leftIndex, value: leftBracket });
+        removed.push({ index, value: x });
+      } else {
         // 匹配成功
-        match.push({leftIndex, rightIndex: index,})
+        match.push({ leftIndex, rightIndex: index });
       }
-    }else{
+    } else {
       // 左括号不存在，选择：删去右括号
-      removed.push({index, value: x})
+      removed.push({ index, value: x });
     }
   }
-    // 多余的左括号
-    while(stack.size()){
-      const leftIndex = stack.size()
-      let x = stack.pop()
-      removed.push({index:leftIndex, value: x})
-    }
+  // 多余的左括号
+  while (stack.size()) {
+    const leftIndex = stack.size();
+    let x = stack.pop();
+    removed.push({ index: leftIndex, value: x });
+  }
 };
 
 /**
  * 判断括号是否匹配
- * @param {*} s 
- * @returns 
+ * @param {*} s
+ * @returns
  */
 const isValid = (s) => {
   const stack = new Stack();
@@ -178,11 +188,45 @@ const isValid = (s) => {
       continue;
     }
     // 遇到右括号就弹出元素，并检查弹出的元素是否为对应的左括号
+    // TODO是否有问题？对于多余的右括号
     if (map[stack.pop()] !== x) return false;
   }
-    return !stack.size();
-}
+  return !stack.size();
+};
+/**
+ * 判断括号是否匹配
+ * @param {*} bracketTokens
+ * @returns
+ */
+const isValid2 = (bracketTokens, removed = [], match = []) => {
+  const stack = new Stack();
+  const map = {
+    "(": ")",
+    "{": "}",
+    "[": "]",
+  };
+  for (let [index, token] of bracketTokens.entries()) {
+    // 遇到左括号入栈
+    if (token.value in map) {
+      stack.push(x);
+      continue;
+    }
+    // 遇到右括号就弹出元素，并检查弹出的元素是否为对应的左括号
 
+    const leftBracketToken = stack.pop();
+    if (map[leftBracketToken.value] !== token.value) {
+      removed.push(leftBracketToken);
+      removed.push(token);
+    } else {
+      match.push(leftBracketToken);
+      match.push(token);
+    }
+  }
+  while (stack.size()) {
+    const leftBracketToken = stack.pop();
+    removed.push(leftBracketToken);
+  }
+};
 // 测试代码
 const input1 = `
   // this is comment({})
@@ -192,8 +236,15 @@ const input1 = `
     }
     return 0;
   }
-`
-const input2 = `23414`
-console.log(tokenize(input2))
+`;
+const input2 = `23414`;
+console.log(tokenize(input2));
 
-export { tokenize, getBracketsFromTokens, isValidBrackets, isValid }
+export {
+  tokenize,
+  getBracketTokens,
+  isValidBrackets,
+  isValid,
+  isValid2,
+  bracketTokensToList,
+};
