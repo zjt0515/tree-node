@@ -2,21 +2,15 @@
   <div class="bracketParser">
     <n-space>
       <h2>请输入C语言代码</h2>
-      <n-button type="primary" @click="getTokens(code)">词法分析</n-button>
     </n-space>
-    <n-input
-      v-model:value="code"
-      type="textarea"
-      :autosize="{
-        minRows: 3,
-      }"
-    />
+    <n-input v-model:value="code" type="textarea" :autosize="{
+      minRows: 3,
+    }" />
+    <n-button class="tokenize-button" type="primary" @click="getTokens(code)">词法分析</n-button>
     <n-card title="括号配对分析器">
       <br />
       {{ "多余的括号: " + removedBrackets }}
-      <n-button v-if="removedBrackets.length" type="error" @click="delete"
-        >删除多余的括号</n-button
-      >
+      <n-button v-if="removedBrackets.length" type="error" @click="delete">删除多余的括号</n-button>
       <h4>查询匹配的括号</h4>
       匹配括号：{{ matchBrackets }} 输入括号位置： 对应的括号位置：{{
         bracketIndex2
@@ -28,39 +22,37 @@
             <n-button type="primary" @click="check">是否匹配</n-button>
             <n-tag type="error"> 成功 </n-tag>
           </template>
-          <n-thing
-            title="括号序列"
-            title-extra="extra"
-            description="description"
-          >
+          <n-thing title="括号序列" title-extra="extra" description="description">
             {{ "括号序列：" + brackets }}
           </n-thing>
         </n-list-item>
         <n-list-item>
-          <n-thing
-            title="多余括号"
-            title-extra="extra"
-            description="选择删除多余括号"
-          />
+          <n-thing title="多余括号" title-extra="extra" description="选择删除多余括号" />
         </n-list-item>
         <n-list-item>
-          <n-thing
-            title="查找匹配的括号"
-            title-extra="extra"
-            description="输入括号在源代码中的位置，返回对应括号的位置"
-          />
+          <n-thing title="查找匹配的括号" title-extra="extra" description="输入括号在源代码中的位置，返回对应括号的位置" />
           <n-input-number v-model:value="bracketIndex1" />
         </n-list-item>
       </n-list>
     </n-card>
-    <n-data-table
-      :columns="columns"
-      :data="tokens"
-      :bordered="false"
-      :row-class-name="rowClassName"
-    />
-    {{ tokens }}
-    {{ brackets }}
+    <!-- Tokens表格 -->
+    <n-space vertical :size="12">
+      <n-space>
+        <n-dropdown trigger="hover" :options="typeOptions" @select="handleSelect">
+          <n-button>类型</n-button>
+        </n-dropdown>
+        <n-button @click="unfilterAddress">
+          清除过滤
+        </n-button>
+      </n-space>
+      <n-space class="tags">
+        <n-tag closable @close="handleClose">
+        </n-tag>
+      </n-space>
+      <n-data-table :columns="columns" :data="tokens" :bordered="false" :row-class-name="rowClassName"
+        :pagination="paginationReactive" @update:filters="handleUpdateFilter" />
+    </n-space>
+    {{ options }}
   </div>
 </template>
 
@@ -77,14 +69,16 @@ import {
   NListItem,
   NThing,
   NTag,
+  NDropdown
 } from "naive-ui";
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, defineComponent } from "vue";
 import {
   tokenize,
   isValidBrackets,
   isValid,
   getBracketsFromTokens,
 } from "@/js/lexer.js";
+import { TokenType } from "@/js/index.js"
 const message = useMessage();
 const code = ref(`int main() {
     // 这是单行注释
@@ -134,6 +128,20 @@ const check = () => {
   }
 };
 
+//表格相关
+const paginationReactive = reactive({
+  page: 1,
+  pageSize: 10,
+  showSizePicker: true,
+  pageSizes: [5, 10, 20],
+  onChange: (page) => {
+    paginationReactive.page = page;
+  },
+  onUpdatePageSize: (pageSize) => {
+    paginationReactive.pageSize = pageSize;
+    paginationReactive.page = 1;
+  }
+});
 const columns = [
   {
     title: "TokenType",
@@ -155,10 +163,16 @@ const rowClassName = (row) => {
   }
   return "";
 };
+const typeOptions = Object.values(TokenType).map(x => ({ label: x, key: x }))
+const
+const handleSelect = (key) => {
+  message.info(String(key));
+}
 </script>
 
 <style scoped>
-.buttons {
-  margin-top: 1.2em;
+.tokenize-button {
+  float: right;
+  margin: 1.2em 1em;
 }
 </style>
