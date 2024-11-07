@@ -53,7 +53,7 @@ const tokenize = (input) => {
     }
     // 解析括号
     if (isBracket(currentChar)){
-      tokens.push(new Token(TokenType.BRACKET, currentChar));
+      tokens.push(new Token(TokenType.BRACKET, currentChar, currentIndex));
       currentIndex++;
       continue;
     }
@@ -120,7 +120,7 @@ const getBracketsFromTokens = (tokens)=>{
  * @param {*} s 
  * @returns 
  */
-const isValidBrackets = (s, removed=[]) => {
+const isValidBrackets = (s, removed=[], match=[]) => {
   const stack = new Stack();
   const map = {
     "(": ")",
@@ -133,27 +133,30 @@ const isValidBrackets = (s, removed=[]) => {
       stack.push(x);
       continue;
     }
-    // 遇到右括号就弹出元素，并检查弹出的元素是否为对应的左括号
+    // 遇到右括号
     if(!stack.isEmpty()){
-      // 不匹配的括号
-      if (map[stack.pop()] !== x){
+      // 左括号存在，弹出左括号检查是否匹配
+      const leftIndex = stack.size()
+      const leftBracket = stack.pop()
+      if (map[leftBracket] !== x){
+        // 删去不匹配的括号
+        removed.push({index:leftIndex, value: leftBracket})
         removed.push({index, value: x})
-        return false;}
+      } else{
+        // 匹配成功
+        match.push({leftIndex, rightIndex: index,})
+      }
     }else{
-      // 多余的右括号
+      // 左括号不存在，选择：删去右括号
       removed.push({index, value: x})
-      return false;
     }
   }
-  if(!stack.size){
     // 多余的左括号
-    while(stack.size){
+    while(stack.size()){
+      const leftIndex = stack.size()
       let x = stack.pop()
-      removed.push({index, value: x})
+      removed.push({index:leftIndex, value: x})
     }
-    return false;
-  }
-  return true;
 };
 
 /**
@@ -161,7 +164,7 @@ const isValidBrackets = (s, removed=[]) => {
  * @param {*} s 
  * @returns 
  */
-const isValid = (s, removed=[]) => {
+const isValid = (s) => {
   const stack = new Stack();
   const map = {
     "(": ")",

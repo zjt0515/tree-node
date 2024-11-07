@@ -21,7 +21,7 @@ import GlobalHeader from './global/GlobalHeader.vue';
   margin: 0 auto;
 }
 .content{
-  height: 100vh;
+  /* height: 100vh; */
 
 }
 .footer{

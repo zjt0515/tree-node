@@ -28,20 +28,22 @@ const findAncestors = (root, x, ancestors = []) => {
   if (root === null) {
     return false;
   }
-
-  // 如果找到目标结点，返回true
-  if (root.value === x) {
-    ancestors.push(root.value)
-    return true;
-  }
-
   let left = findAncestors(root.left, x, ancestors)
   let right = findAncestors(root.right, x, ancestors)
   // 在左右左子树查找
   if (left || right) {
+    Object.assign(root, {highlight: true})
     ancestors.push(root.value);
     return true;
   }
+  // 如果找到目标结点，返回true
+  if (root.value === x){
+    Object.assign(root, {highlight: true})
+    ancestors.push(root.value)
+    return true;
+  }
+
+
   // 如果在左右子树都没有找到目标结点，返回false
   return false;
 }

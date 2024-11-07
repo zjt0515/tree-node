@@ -7,35 +7,43 @@
   <n-space align="center" class="search">
     查询值为<n-input-number v-model:value="x" placeholder="" clearable />的所有祖先结点
   <n-button type="primary" @click="searchAncestors">查询</n-button>
-  <n-card title="查询结果">
-    {{ ancestors }}  
+  <n-card embedded title="查询结果">
+    祖先：{{ ancestors }}
+
   </n-card>
   </n-space>
   
   <canvas id="cvs"></canvas>
+
+  <n-card title="测试数据">
+    {{ ancestors }}  
+    nodeData: {{ nodeData  }}
+  </n-card>
 </template>
 
 <script setup>
 import { NInput, NButton, NInputNumber,NSpace, NCard, useMessage} from 'naive-ui';
-import { computed, onMounted, ref, watchEffect } from 'vue';
-import { arrayToTree,findAncestors  } from '@/js/treenode.js'
+import { computed, onMounted, reactive, ref, watchEffect } from 'vue';
+import { arrayToTree, findAncestors} from '@/js/treenode.js'
 const message = useMessage()
 /** @type {HTMLCanvasElement} */
 let cvs
 let ctx
 const data = ref("[3,5,9,4,6,2,4,6,8,2]")
-const root = ref()
+const nodeData = reactive({root: null})
 const ancestors = ref([])
 const x = ref()
 const searchAncestors = () => {
+  draw()
   ancestors.value = []
-  if(findAncestors(root.value, x.value, ancestors.value)){
+  if(findAncestors(nodeData.root, x.value, ancestors.value)){
     message.success('查询成功')
     draw()
   } else {
-    message.error(`未找到在值为${x.value}的结点`)
+    message.error(`未找到值为${x.value}的结点`)
   }
 }
+
 const isValid = (data) => {
   try {
     // 尝试解析输入的字符串为数组
@@ -64,15 +72,6 @@ onMounted(()=>{
   // drawNode(ctx, root.value, 400, 50, 150, 50)
 })
 
-// watchEffect(()=>{
-  // cvs = document.getElementById('cvs')
-  // if(cvs.getContext){
-  //   ctx = cvs.getContext('2d')
-  // }
-  // init()
-//   const root = arrayToTree(data.value);
-//   drawNode(ctx, root, 400, 50, 150, 50)
-// })
 function init(){
   ctx.clearRect(0, 0, 1000, 600); // 清除画布
 
@@ -86,11 +85,14 @@ function init(){
   cvs.style.width = w + 'px';
   cvs.style.height = h + 'px';
 }
+/**
+ * 绘制二叉树
+ */
 function draw(){
   if(isValid(data.value)){
     ctx.clearRect(0, 0, 1000, 600); // 清除画布
-    root.value = arrayToTree(JSON.parse(data.value));
-    drawNode(ctx, root.value, 400, 50, 150, 50)
+    nodeData.root = arrayToTree(JSON.parse(data.value));
+    drawNode(ctx, nodeData.root, 400, 50, 150, 50)
   }
 }
 function drawNode(ctx, node, x, y, offsetX, offsetY) {
@@ -102,6 +104,10 @@ function drawNode(ctx, node, x, y, offsetX, offsetY) {
   ctx.arc(x, y, 20, 0, Math.PI * 2);
   ctx.fill();
   // 绘制value
+  if(node?.highlight){
+    console.log("存在")
+    ctx.fillStyle = "#777";
+  }
   ctx.font='1.4em sans-serif';
   ctx.fillStyle = "#fff";
   ctx.fillText(node.value, x - 7, y + 5);

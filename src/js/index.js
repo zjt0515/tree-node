@@ -54,9 +54,10 @@ const TokenType = Object.freeze({
 });
 // Token类表示每个词法单元
 class Token {
-    constructor(type, value) {
+    constructor(type, value, index=null) {
         this.type = type;
         this.value = value;
+        this.index = index;
     }
 
     toString() {
