@@ -1,8 +1,6 @@
 <template>
   <h2>二叉树</h2>
-  <!-- {{"data:"+ data }}
-  {{"root:"+ root }} -->
-
+  <!-- 交互 -->
   <n-grid :x-gap="16" :y-gap="12" :cols="2">
     <n-grid-item>
       <n-input v-model:value="data" type="text" placeholder="输入二叉树数组形式(空节点输入null)">
@@ -22,12 +20,13 @@
       <n-button type="primary" ghost @click="searchAncestors">查询所有祖先节点</n-button>
     </n-grid-item>
   </n-grid>
-  <n-card embedded title="查询结果">
-    祖先：{{ ancestors }}
-
-  </n-card>
-  <canvas id="cvs"></canvas>
-
+  <!-- 结果展示 -->
+  <div class="result">
+    <n-card embedded title="查询结果">
+      祖先：{{ ancestors }}
+    </n-card>
+    <canvas id="cvs"></canvas>
+  </div>
   <n-card title="测试数据">
     {{ ancestors }}
     nodeData: {{ nodeData }}
@@ -87,7 +86,6 @@ onMounted(() => {
 
 function init() {
   ctx.clearRect(0, 0, 1000, 600); // 清除画布
-
   // 设置绘制样式
   ctx.strokeStyle = "#000";
   ctx.fillStyle = "#000";
@@ -143,4 +141,8 @@ function drawNode(ctx, node, x, y, offsetX, offsetY) {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.result {
+  margin-top: 1.2em;
+}
+</style>

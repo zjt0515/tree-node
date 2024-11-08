@@ -42,8 +42,6 @@ const findAncestors = (root, x, ancestors = []) => {
     ancestors.push(root.value)
     return true;
   }
-
-
   // 如果在左右子树都没有找到目标结点，返回false
   return false;
 }

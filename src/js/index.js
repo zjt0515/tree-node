@@ -25,7 +25,6 @@ class Stack {
     }
 }
 // export {Stack}
-
 function isBracket(char){
     return /[\(\)\[\]\{\}\<\>]/.test(char);
 }
@@ -43,6 +42,7 @@ function isDigit(char){
 }
 // 定义TokenType枚举
 const TokenType = Object.freeze({
+    BRACKET: 'bracket',
     KEYWORD: 'keyword',
     IDENTIFIER: 'identifier',
     NUMBER: 'number',
@@ -50,7 +50,6 @@ const TokenType = Object.freeze({
     PUNCTUATOR: 'punctuator',
     STRING: 'string',
     COMMENT: 'comment',
-    BRACKET: 'bracket'
 });
 // Token类表示每个词法单元
 class Token {
@@ -61,7 +60,7 @@ class Token {
     }
 
     toString() {
-        return `Token(${this.type}, ${this.value})`;
+        return `Token(${this.type}, ${this.value},${this.index})`;
     }
 }
 // 关键字定义
